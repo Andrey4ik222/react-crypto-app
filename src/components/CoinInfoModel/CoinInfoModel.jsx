@@ -48,6 +48,8 @@ const CoinInfoModel = ({ coin }) => {
         {coin.contractAddress}
       </Typography.Paragraph>
 
+      <Divider />
+
       <Flex justify="space-evenly">
         <a href={coin.twitterUrl} target="_blank" rel="noreferrer">
           <TwitterOutlined />

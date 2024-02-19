@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { createContext } from "react";
 import { useEffect, useState } from "react";
-import { fakeFetchAssets, fakeFetchCrypto } from "../api";
+import { fakeFetchAssets } from "../api";
 import { percentDiff } from "../helpers";
 
 const CryptoContext = createContext({
@@ -9,6 +9,16 @@ const CryptoContext = createContext({
   crypto: [],
   loading: false,
 });
+
+const URL = "https://openapiv1.coinstats.app/coins";
+
+const options = {
+  method: "GET",
+  headers: {
+    accept: "application/json",
+    "X-API-KEY": "NVq4/XB8QlfjwVDKc4hsGuO0dOC1QP94Tr74379EY/k=",
+  },
+};
 
 export function CryptoContextProvider({ children }) {
   const [loading, setLoading] = useState(false);
@@ -26,6 +36,7 @@ export function CryptoContextProvider({ children }) {
           asset.amount * coin.price -
           asset.amount * asset.price
         ).toFixed(2),
+        name: coin.name,
         ...asset,
       };
     });
@@ -34,13 +45,17 @@ export function CryptoContextProvider({ children }) {
   useEffect(() => {
     async function perload() {
       setLoading(true);
-      const { result } = await fakeFetchCrypto();
-      const assets = await fakeFetchAssets();
-
-      setCrypto(result);
-      setAssets(mapAssets(assets, result));
-
-      setLoading(false);
+      try {
+        const response = await fetch(URL, options);
+        const result = await response.json();
+        setCrypto(result.result);
+        const assets = await fakeFetchAssets();
+        setAssets(mapAssets(assets, result.result));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
 
     perload();
